@@ -6,6 +6,8 @@ from map_generator import level
 class CapMan(p.sprite.Sprite):
     def __init__(self):
         super().__init__()
+        #Kierunek postaci
+        self.capman_direction = None
         #Ilość serduszek
         self.hearts = 2
         #Prędkość z jaką Cap-Man będzie się poruszał (pixels per frame)
