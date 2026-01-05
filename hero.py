@@ -85,12 +85,11 @@ class CapMan(p.sprite.Sprite):
             return "move_left"
         return None
     #Zmienia kierunek poruszania się postaci
-    def update(self,direction):
+    def update(self, direction):
         turns = self.check_position(direction)
-        self.player_movement(direction,turns)
-        
-        #Teleport Cap-Mana
-        #40px od prawej krawędzi ekranu, i 10 od lewej
+        self.player_movement(direction, turns)
+
+        # TELEPORT TUNELU 
         if self.rect.centerx > WIDTH - 40:
             self.rect.centerx = 10
         elif self.rect.centerx < 10:
@@ -101,49 +100,77 @@ class CapMan(p.sprite.Sprite):
         self.speed += 1
     def reduce_speed(self):
         self.speed -= 1
-    def check_position(self,direction):
-        #Czy postać może poruszyć się w Prawo,Lewo, Górę, Dół
+    def check_position(self, direction):
+        # Czy postać może poruszyć się w Prawo,Lewo, Górę, Dół
         turns = [False, False, False, False]
-        #Pomocnicza zmienna
         num_help = 15
-        #Sprawdzamy czy możemy wrócić
-        #Gdy wymiary kafelka to 30x30
+
+        max_y = len(level)
+        max_x = len(level[0])
+
+        def safe_check(y, x):
+            # y musi być w zakresie, x możemy zawinąć (tunel)
+            if 0 <= y < max_y:
+                x_wrapped = x % max_x
+                return level[y][x_wrapped] in ('a', 'o', 'n')
+            return False
+
         if self.rect.centerx // 30 < 29:
             if direction == "move_right":
-                if level[self.rect.centery // TILE_SIZE_Y][(self.rect.centerx - num_help) // TILE_SIZE_X] in ('a','o','n'):
-                    turns[1] = True
-            if direction == "move_left":
-                if level[self.rect.centery // TILE_SIZE_Y][(self.rect.centerx - num_help) // TILE_SIZE_X] in ('a','o','n'):
+                if safe_check(self.rect.centery // TILE_SIZE_Y,
+                            (self.rect.centerx + num_help) // TILE_SIZE_X):
                     turns[0] = True
+
+            if direction == "move_left":
+                if safe_check(self.rect.centery // TILE_SIZE_Y,
+                            (self.rect.centerx - num_help) // TILE_SIZE_X):
+                    turns[1] = True
+
             if direction == "move_up":
-                if level[(self.rect.centery + num_help) // TILE_SIZE_Y][self.rect.centerx // TILE_SIZE_X] in ('a','o','n'):
-                    turns[3] = True
-            if direction == "move_down":
-                if level[(self.rect.centery - num_help) // TILE_SIZE_Y][self.rect.centerx // TILE_SIZE_X] in ('a','o','n'):
+                if safe_check((self.rect.centery - num_help) // TILE_SIZE_Y,
+                            self.rect.centerx // TILE_SIZE_X):
                     turns[2] = True
+
+            if direction == "move_down":
+                if safe_check((self.rect.centery + num_help) // TILE_SIZE_Y,
+                            self.rect.centerx // TILE_SIZE_X):
+                    turns[3] = True
+
             if direction == "move_up" or direction == "move_down":
                 if (TILE_SIZE_X // 2) - 3 <= self.rect.centerx % TILE_SIZE_X <= (TILE_SIZE_X // 2) + 3:
-                    if level[(self.rect.centery + num_help)//TILE_SIZE_Y][self.rect.centerx // TILE_SIZE_X] in ('a','o','n'):
+                    if safe_check((self.rect.centery + num_help)//TILE_SIZE_Y,
+                                self.rect.centerx // TILE_SIZE_X):
                         turns[3] = True
-                    if level[(self.rect.centery - num_help)//TILE_SIZE_Y][self.rect.centerx // TILE_SIZE_X] in ('a','o','n'):
+                    if safe_check((self.rect.centery - num_help)//TILE_SIZE_Y,
+                                self.rect.centerx // TILE_SIZE_X):
                         turns[2] = True
+
                 if (TILE_SIZE_Y // 2) - 3 <= self.rect.centery % TILE_SIZE_Y <= (TILE_SIZE_Y // 2) + 3:
-                    if level[self.rect.centery//TILE_SIZE_Y][(self.rect.centerx - TILE_SIZE_X) // TILE_SIZE_X] in ('a','o','n'):
+                    if safe_check(self.rect.centery//TILE_SIZE_Y,
+                                (self.rect.centerx - TILE_SIZE_X) // TILE_SIZE_X):
                         turns[1] = True
-                    if level[self.rect.centery//TILE_SIZE_Y][(self.rect.centerx + TILE_SIZE_X) // TILE_SIZE_X] in ('a','o','n'):
+                    if safe_check(self.rect.centery//TILE_SIZE_Y,
+                                (self.rect.centerx + TILE_SIZE_X) // TILE_SIZE_X):
                         turns[0] = True
+
             if direction == "move_right" or direction == "move_left":
                 if (TILE_SIZE_X // 2) - 3 <= self.rect.centerx % TILE_SIZE_X <= (TILE_SIZE_X // 2) + 3:
-                    if level[(self.rect.centery + TILE_SIZE_Y)//TILE_SIZE_Y][self.rect.centerx // TILE_SIZE_X] in ('a','o','n'):
+                    if safe_check((self.rect.centery + TILE_SIZE_Y)//TILE_SIZE_Y,
+                                self.rect.centerx // TILE_SIZE_X):
                         turns[3] = True
-                    if level[(self.rect.centery - TILE_SIZE_Y)//TILE_SIZE_Y][self.rect.centerx // TILE_SIZE_X] in ('a','o','n'):
+                    if safe_check((self.rect.centery - TILE_SIZE_Y)//TILE_SIZE_Y,
+                                self.rect.centerx // TILE_SIZE_X):
                         turns[2] = True
+
                 if (TILE_SIZE_Y // 2) - 3 <= self.rect.centery % TILE_SIZE_Y <= (TILE_SIZE_Y // 2) + 3:
-                    if level[self.rect.centery//TILE_SIZE_Y][(self.rect.centerx - num_help) // TILE_SIZE_X] in ('a','o','n'):
+                    if safe_check(self.rect.centery//TILE_SIZE_Y,
+                                (self.rect.centerx - num_help) // TILE_SIZE_X):
                         turns[1] = True
-                    if level[self.rect.centery//TILE_SIZE_Y][(self.rect.centerx + num_help) // TILE_SIZE_X] in ('a','o','n'):
+                    if safe_check(self.rect.centery//TILE_SIZE_Y,
+                                (self.rect.centerx + num_help) // TILE_SIZE_X):
                         turns[0] = True
         else:
             turns[0] = True
             turns[1] = True
+
         return turns
