@@ -22,12 +22,12 @@ while running:
         if event.type == p.KEYDOWN:
             last_key = player.sprite.checking_Pressed_Keys()
             if last_key != None:
-                PRESSED_KEY = last_key
-                player.sprite.player_rotation(PRESSED_KEY)
+                DIRECTION = last_key
+                player.sprite.player_rotation(DIRECTION)
     screen.fill('black')
     draw_map(screen)
     player.draw(screen)
-    player.update(PRESSED_KEY)
+    player.update(DIRECTION)
     p.display.flip()
     clock.tick(60)
 p.quit()

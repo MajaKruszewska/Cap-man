@@ -20,16 +20,16 @@ while running:
         #Sprawdza czy wcisneliśmy jakiś przycisk
         if event.type == p.KEYDOWN:
             #Przypisuje klawisz jaki wcisneliśmy do zmiennej last_key
-            last_key = player.sprite.checking_Pressed_Keys()
+            last_direction = player.sprite.checking_Pressed_Keys()
             #Last_key = None wtw gdy nie jest to klawisz odpowiadający za zmiane kierunku (strzałki albo WASD)
-            if last_key != None and last_key != PRESSED_KEY:
-                PRESSED_KEY = last_key
-                player.sprite.player_rotation(PRESSED_KEY)
+            if last_direction != None and last_direction != DIRECTION:
+                DIRECTION = last_direction
+                player.sprite.player_rotation(DIRECTION)
     screen.fill("Purple")
     #Narysowanie Cap-Mana na ekranie
     player.draw(screen)
     #Aktualizuje co robimy z naszą postacią
-    player.update(PRESSED_KEY)
+    player.update(DIRECTION)
     p.display.flip()
     #Ustawia maks FPS, prędkość obiektów jest zależna od ilości FPS
     clock.tick(60)
