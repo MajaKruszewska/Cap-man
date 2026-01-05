@@ -12,7 +12,7 @@ class CapMan(p.sprite.Sprite):
         self.speed = 1
         #Pomocniczy obrazek, do zmiany
         self.angle = 0
-        self.image = p.image.load('../zdj/cap_man_1.png').convert_alpha()
+        self.image = p.image.load('cap_man_1.png').convert_alpha()
         self.image = p.transform.scale(self.image,(45,45))
         #Podstawowa pozycja Cap - Mana na obecnej mapie
         self.rect = self.image.get_rect(center = (STARTING_POSITION_X,STARTING_POSITION_Y))
