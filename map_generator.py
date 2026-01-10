@@ -51,5 +51,5 @@ def draw_map(screen, level):
                 p.draw.line(screen, 'white', (j * TILE_SIZE_X - (TILE_SIZE_X / 2) + 2, i * TILE_SIZE_Y + (TILE_SIZE_Y / 2)), ((j + 1) * TILE_SIZE_X + (TILE_SIZE_X / 2), i * TILE_SIZE_Y + (TILE_SIZE_Y / 2)), 3)
             
             
-
+level = board
 
