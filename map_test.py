@@ -30,12 +30,12 @@ while running:
         if event.type == p.KEYDOWN:
             last_key = player.sprite.checking_Pressed_Keys()
             if last_key != None:
-                player.sprite.capman_direction = last_key
-                player.sprite.player_rotation(player.sprite.capman_direction)
+                player.sprite.direction = last_key
+                player.sprite.player_rotation(player.sprite.direction)
     screen.fill('black')
     draw_map(screen, level)
     player.draw(screen)
-    player.update(player.sprite.capman_direction)
+    player.update(player.sprite.direction)
     p.display.flip()
     clock.tick(60)
 p.quit()

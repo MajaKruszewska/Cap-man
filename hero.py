@@ -1,41 +1,58 @@
 import pygame as p
-from sys import exit
 from CONST import *
 from map_generator import level
+
 #Stworzenie klasy CapMan
+
 class CapMan(p.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        #Kierunek postaci
-        self.capman_direction = None
-        #Ilość serduszek
-        self.hearts = 2
-        #Prędkość z jaką Cap-Man będzie się poruszał (pixels per frame)
-        self.speed = 1
+
+        self.direction = None #Kierunek postaci
+        self.next_direction = None
+        self.hearts = 2 #Ilość serduszek
+        self.speed = 3 #Prędkość
+
         #Pomocniczy obrazek, do zmiany
+
         self.angle = 0
         self.image = p.image.load('cap_man_1.png').convert_alpha()
         self.image = p.transform.scale(self.image,(45,45)) 
+
         #Podstawowa pozycja Cap - Mana na obecnej mapie
+
         self.rect = self.image.get_rect(center = (STARTING_POSITION_X,STARTING_POSITION_Y))
-    def player_movement(self, direction,turns):
+
+
+    def player_movement(self, direction, turns):
         #Porusza się w odpowiednim kierunku pod warunkiem że środek jest na ekranie
         #Oraz nie zostanie wciśnięty inny klawisz
+
+        center_x = (self.rect.centerx // TILE_SIZE_X) * TILE_SIZE_X + (TILE_SIZE_X // 2)
+        center_y = (self.rect.centery // TILE_SIZE_Y) * TILE_SIZE_Y + (TILE_SIZE_Y // 2)
+
         if direction == "move_up" and turns[2]:
             self.rect.y -= self.speed
+            self.rect.centerx = center_x
         elif direction == "move_down" and turns[3]:
             self.rect.y += self.speed
+            self.rect.centerx = center_x
         elif direction == "move_right" and turns[0]:
             self.rect.x += self.speed
+            self.rect.centery = center_y
         elif direction == "move_left" and turns[1]:
             self.rect.x -= self.speed
-    def player_rotation(self,direction):
+            self.rect.centery = center_y
+
+
+    def player_rotation(self, direction):
         #Oraz nie zostanie wciśnięty inny klawisz
         # 0 stopni - porusza się w prawo
         # 90 stopni - porusza się w dół
         # 270 stopni - porusza się w górę
         # 180 stopni - porusza się w lewo
         # rotated = p.transform.rotate(self.image, self.angle)
+
         turns = self.check_position(direction)
         if direction == "move_up" and turns[2]:
             if self.angle == 90:
@@ -73,7 +90,9 @@ class CapMan(p.sprite.Sprite):
                 self.image = p.transform.rotate(self.image, -90)
                 self.image = p.transform.flip(self.image,True, False)
             self.angle = 180
+
     @staticmethod
+
     def checking_Pressed_Keys():
         #Zwraca obecnie kierunek, jeżeli jest jednym z tych które bierzemy pod uwagę
         keys = p.key.get_pressed()
@@ -87,24 +106,31 @@ class CapMan(p.sprite.Sprite):
             return "move_left"
         return None
     #Zmienia kierunek poruszania się postaci
+
+
     def update(self, direction):
         turns = self.check_position(direction)
         self.player_movement(direction, turns)
 
         # TELEPORT TUNELU 
+
         if self.rect.centerx > WIDTH - 10:
             self.rect.centerx = 10
         elif self.rect.centerx < 10:
             self.rect.centerx = WIDTH - 10
         
     #Funkcje do zwiększenia i zmniejszenia prędkości 
+
     def increase_speed(self):
         self.speed += 1
+
+
     def reduce_speed(self):
         self.speed -= 1
+
+
     def check_position(self,direction):
-        # turns = [right, left, up, down]
-        turns = [False, False, False, False]
+        turns = [False, False, False, False] # turns = [right, left, up, down]
 
         num1 = TILE_SIZE_Y      # wysokość kafelka
         num2 = TILE_SIZE_X      # szerokość kafelka
@@ -191,3 +217,4 @@ class CapMan(p.sprite.Sprite):
             turns[1] = True
 
         return turns
+    
