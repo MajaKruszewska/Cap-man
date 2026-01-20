@@ -8,16 +8,14 @@ class CapMan(p.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        self.direction = None #Kierunek postaci
         self.capman_direction = None
-        self.next_direction = None
         self.hearts = 2 #Ilość serduszek
         self.speed = 3 #Prędkość
         self.rage = False  # Tryb zjadania duszków
         #Pomocniczy obrazek, do zmiany
 
         self.angle = 0
-        self.image = p.image.load('cap_man_1.png').convert_alpha()
+        self.image = p.image.load('images/cap_man_1_1.png').convert_alpha()
         self.image = p.transform.scale(self.image,(45,45)) 
 
         #Podstawowa pozycja Cap - Mana na obecnej mapie
