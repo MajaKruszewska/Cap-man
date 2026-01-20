@@ -30,11 +30,11 @@ pinky.add(Pinky())
 clyde = p.sprite.GroupSingle()
 clyde.add(Clyde())
 
-ghost_red = p.sprite.GroupSingle()
-ghost_red.add(red())
+#ghost_red = p.sprite.GroupSingle()
+#ghost_red.add(red())
 
-ghost_inky = p.sprite.GroupSingle()
-ghost_inky.add(inky())
+#ghost_inky = p.sprite.GroupSingle()
+#ghost_inky.add(inky())
 
 level = copy.deepcopy(board)
 
@@ -56,14 +56,14 @@ def reset_positions():
     player.empty()
     pinky.empty()
     clyde.empty()
-    ghost_red.empty()
-    ghost_inky.empty()
+    #ghost_red.empty()
+    #ghost_inky.empty()
 
     player.add(CapMan())
     pinky.add(Pinky())
     clyde.add(Clyde())
-    ghost_red.add(red())
-    ghost_inky.add(inky())
+    #ghost_red.add(red())
+    #ghost_inky.add(inky())
 
 def check_point_collision(player_sprite, current_level, current_score):
     # Obliczamy indeksy kafelka, na którym znajduje się środek gracza
@@ -114,17 +114,16 @@ def activate_frightened_mode():
     frightened_start_time = p.time.get_ticks()
     
     # 1. Pinky (Brak metody, ręczne ustawienie, uwaga na literówkę w pinky.py)
-    pinky.sprite.mode = "FRIGHTEND" 
-    pinky.sprite.speed = FRIGHTENED_SPEED
-    
+    pinky.sprite.scared()
+
     # 2. Clyde (Metoda scared, uwaga na literówkę w clyde.py)
     clyde.sprite.scared()
     
     # 3. Red (Metoda frighten)
-    ghost_red.sprite.frighten()
+    #ghost_red.sprite.frighten()
     
     # 4. Inky (Metoda frighten)
-    ghost_inky.sprite.frighten()
+    #ghost_inky.sprite.frighten()
 
 def update_ghosts_modes(current_time_sec):
     """Zarządza powrotem do normalnego trybu po upływie czasu"""
@@ -136,14 +135,13 @@ def update_ghosts_modes(current_time_sec):
             is_frightened = False
             # Wymuszamy aktualizację trybu na podstawie czasu gry
             # Pinky
-            pinky.sprite.mode_update(current_time_sec)
-            pinky.sprite.speed = PINKY_SPEED
+            pinky.sprite.unscared(current_time_sec)
             # Clyde
             clyde.sprite.unscared(current_time_sec)
             # Red
-            ghost_red.sprite.mode_update(current_time_sec)
+            #ghost_red.sprite.mode_update(current_time_sec)
             # Inky
-            ghost_inky.sprite.mode_update(current_time_sec)
+            #ghost_inky.sprite.mode_update(current_time_sec)
 
 def show_game_final_score():
     overlay = p.Surface((WIDTH, HEIGHT))
@@ -189,8 +187,8 @@ while running:
 
     pinky.update(player.sprite, current_time_seconds)
     clyde.update(player.sprite, current_time_seconds)
-    ghost_red.update(player.sprite, current_time_seconds)
-    ghost_inky.update(player.sprite, ghost_red.sprite, current_time_seconds)
+    #ghost_red.update(player.sprite, current_time_seconds)
+    #ghost_inky.update(player.sprite, ghost_red.sprite, current_time_seconds)
 
     player.update(player.sprite.direction)
 
@@ -200,7 +198,7 @@ while running:
 
     death_occured = False
 
-    ghosts_list = [pinky.sprite, clyde.sprite, ghost_red.sprite, ghost_inky.sprite]
+    ghosts_list = [pinky.sprite, clyde.sprite]#, ghost_red.sprite, ghost_inky.sprite]
 
     for ghost in ghosts_list:
         result = handle_ghost_collision(ghost, player.sprite)
@@ -232,8 +230,8 @@ while running:
     player.draw(screen)
     pinky.draw(screen)
     clyde.draw(screen)
-    ghost_red.draw(screen)
-    ghost_inky.draw(screen)
+    #ghost_red.draw(screen)
+    #ghost_inky.draw(screen)
 
     #aktualizacja wyniku
     score_text = game_font.render(f"Licznik punktów: {score}", True, "white")

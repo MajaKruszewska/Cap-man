@@ -47,7 +47,7 @@ class Clyde(pygame.sprite.Sprite):
 
     def get_target(self, pacman):
         if self.mode == "SCATTER": return 2, 26
-        if self.mode == "FRIGHTEND": return -1, -1
+        if self.mode == "FRIGHTENED": return -1, -1
         if self.mode == "EATEN": return self.home_x, self.home_y
         clyde_tile_x = self.rect.centerx // const.TILE_SIZE_X
         clyde_tile_y = self.rect.centery // const.TILE_SIZE_Y
@@ -60,7 +60,7 @@ class Clyde(pygame.sprite.Sprite):
 
     #zamian trybu wzgledem czasu
     def mode_update(self, time):
-        if self.mode == "FRIGHTEND": return
+        if self.mode == "FRIGHTENED": return
         if self.mode == "EATEN": return
         if 0 < time <= 7: self.mode = "SCATTER"
         elif 7 < time <= 27: self.mode = "CHASE"
@@ -135,7 +135,13 @@ class Clyde(pygame.sprite.Sprite):
         target_x, target_y = self.get_target(pacman)
 
         if target_x == -1 and target_y == -1:
-            self.move(random.choice(moves))
+            directions = []
+            if moves[0] and self.direction != const.LEFT: directions.append(const.RIGHT)
+            if moves[1] and self.direction != const.RIGHT: directions.append(const.LEFT)
+            if moves[2] and self.direction != const.DOWN: directions.append(const.UP)
+            if moves[3] and self.direction != const.UP: directions.append(const.DOWN)
+            if self.direction in directions: self.move(self.direction)
+            else: self.move(random.choice(directions))
             return
         
         tile_x = self.rect.centerx // const.TILE_SIZE_X
@@ -171,7 +177,7 @@ class Clyde(pygame.sprite.Sprite):
         return ((pinky_tile_x == pacman_tile_x) and (pinky_tile_y == pacman_tile_y))
     
     def scared(self):
-        self.mode = "FRIGHTEND"
+        self.mode = "FRIGHTENED"
         self.speed = const.FRIGHTENED_SPEED
         #zmiana grafiki
     
