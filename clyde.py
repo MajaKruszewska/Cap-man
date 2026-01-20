@@ -26,6 +26,9 @@ def bfs(start_x, start_y, target_x, target_y, allowed, flag):
             if 0 <= nx < len(grid[0]) and 0 <= ny < len(grid) and (nx, ny) not in visited and grid[ny][nx] in allowed:
                 visited.add((nx, ny))
                 queue.append((nx, ny, path + [(nx, ny)]))
+        #tunel
+        if curr_x == 0 and (40, curr_y) not in visited: queue.append((40, curr_y, path + [(40, curr_y)]))
+        if curr_x == 40 and (0, curr_y) not in visited: queue.append((0, curr_y, path + [(0, curr_y)]))
     return None
 
 class Clyde(pygame.sprite.Sprite):
@@ -166,11 +169,17 @@ class Clyde(pygame.sprite.Sprite):
             new_y = tile_y if const.DIRECTIONS[i] == 0 else (self.rect.centery + (const.TILE_SIZE_Y)*const.DIRECTIONS[i][1]) // const.TILE_SIZE_Y
             if new_x == goto_x and new_y == goto_y: 
                 direction = const.DIRECTIONS[i]
+        
+        if tile_x == 0 and goto_x == 40: direction = const.LEFT
+        if tile_x == 40 and goto_x == 0: direction = const.RIGHT
+
         self.move(direction)
 
+        #print(self.rect.centerx, self.rect.centery)
         #tunel
         if self.rect.centerx > const.WIDTH - 10: self.rect.centerx = 10
         elif self.rect.centerx < 10: self.rect.centerx = const.WIDTH - 10
+       #print(self.rect.centerx, self.rect.centery)
         return None
 
     #sprawdzenie kolizji
