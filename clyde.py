@@ -26,13 +26,16 @@ def bfs(start_x, start_y, target_x, target_y, allowed, flag):
             if 0 <= nx < len(grid[0]) and 0 <= ny < len(grid) and (nx, ny) not in visited and grid[ny][nx] in allowed:
                 visited.add((nx, ny))
                 queue.append((nx, ny, path + [(nx, ny)]))
+        #tunel
+        if curr_x == 0 and (40, curr_y) not in visited: queue.append((40, curr_y, path + [(40, curr_y)]))
+        if curr_x == 40 and (0, curr_y) not in visited: queue.append((0, curr_y, path + [(0, curr_y)]))
     return None
 
 class Clyde(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        self.home_x, self.home_y = 22.5*const.TILE_SIZE_X, 9.5*const.TILE_SIZE_Y
+        self.home_x, self.home_y = 22.5*const.TILE_SIZE_X, 9*const.TILE_SIZE_Y
         self.direction = const.LEFT
         self.mode = "SCATTER"
         self.speed = const.CLYDE_SPEED
@@ -47,22 +50,28 @@ class Clyde(pygame.sprite.Sprite):
 
     def get_target(self, pacman):
         if self.mode == "SCATTER": return 2, 26
-        if self.mode == "FRIGHTEND": return -1, -1
-        if self.mode == "EATEN": return self.home_x, self.home_y
+        if self.mode == "FRIGHTENED": return -1, -1
+        if self.mode == "EATEN": return self.home_x // const.TILE_SIZE_X, self.home_y // const.TILE_SIZE_Y
         clyde_tile_x = self.rect.centerx // const.TILE_SIZE_X
         clyde_tile_y = self.rect.centery // const.TILE_SIZE_Y
         pacman_tile_x = pacman.rect.centerx // const.TILE_SIZE_X
         pacman_tile_y = pacman.rect.centery // const.TILE_SIZE_Y
-        allowed = "ano" if self.mode == "CHASE" else "anop" 
+        allowed = "anop" if self.mode == "CHASE" else "anop" 
         length = bfs(clyde_tile_x, clyde_tile_y, pacman_tile_x, pacman_tile_y, allowed, 1)
         if length > 8: return pacman_tile_x, pacman_tile_y
         return 2, 26
 
     #zamian trybu wzgledem czasu
     def mode_update(self, time):
-        if self.mode == "FRIGHTEND": return
-        if self.mode == "EATEN": return
-        if 0 < time <= 7: self.mode = "SCATTER"
+        if self.mode == "FRIGHTENED": return
+        if self.mode == "EATEN":
+            #print(self.rect.centerx, self.home_x, self.rect.centery, self.home_y)
+            if self.rect.centerx == self.home_x and self.rect.centery == self.home_y and self.cooldown != 0: self.cooldown -= 1
+            if self.rect.centerx == self.home_x and self.rect.centery == self.home_y and self.cooldown == 0:
+                self.speed = const.PINKY_SPEED
+                self.mode = "SCATTER"
+            return
+        elif 0 < time <= 7: self.mode = "SCATTER"
         elif 7 < time <= 27: self.mode = "CHASE"
         elif 27 < time <= 34: self.mode = "SCATTER"
         elif 34 < time <= 54: self.mode = "CHASE" 
@@ -84,7 +93,7 @@ class Clyde(pygame.sprite.Sprite):
         def possible(y, x):
             if 0 <= y <= max_y:
                 x = x%max_x
-                if self.mode == "CHASE": return grid[y][x] in "ano"
+                if self.mode == "CHASE": return grid[y][x] in "anop"
                 else: return grid[y][x] in "anop"
             return False
 
@@ -135,7 +144,13 @@ class Clyde(pygame.sprite.Sprite):
         target_x, target_y = self.get_target(pacman)
 
         if target_x == -1 and target_y == -1:
-            self.move(random.choice(moves))
+            directions = []
+            if moves[0] and self.direction != const.LEFT: directions.append(const.RIGHT)
+            if moves[1] and self.direction != const.RIGHT: directions.append(const.LEFT)
+            if moves[2] and self.direction != const.DOWN: directions.append(const.UP)
+            if moves[3] and self.direction != const.UP: directions.append(const.DOWN)
+            if self.direction in directions: self.move(self.direction)
+            else: self.move(random.choice(directions))
             return
         
         tile_x = self.rect.centerx // const.TILE_SIZE_X
@@ -143,21 +158,28 @@ class Clyde(pygame.sprite.Sprite):
         direction = None
 
 
-        allowed = "ano" if self.mode == "CHASE" else "anop" 
+        allowed = "anop" if self.mode == "CHASE" else "anop" 
         goto = bfs(tile_x, tile_y, target_x, target_y, allowed, 0)
+        #print(goto)
         goto_x, goto_y = goto
 
         for i in range(4):
-            if not moves[i]: continue
+            #if not moves[i]: continue
             new_x = tile_x if const.DIRECTIONS[i] == 0 else (self.rect.centerx + (const.TILE_SIZE_X)*const.DIRECTIONS[i][0]) // const.TILE_SIZE_X
             new_y = tile_y if const.DIRECTIONS[i] == 0 else (self.rect.centery + (const.TILE_SIZE_Y)*const.DIRECTIONS[i][1]) // const.TILE_SIZE_Y
             if new_x == goto_x and new_y == goto_y: 
                 direction = const.DIRECTIONS[i]
+        
+        if tile_x == 0 and goto_x == 40: direction = const.LEFT
+        if tile_x == 40 and goto_x == 0: direction = const.RIGHT
+
         self.move(direction)
 
+        #print(self.rect.centerx, self.rect.centery)
         #tunel
         if self.rect.centerx > const.WIDTH - 10: self.rect.centerx = 10
         elif self.rect.centerx < 10: self.rect.centerx = const.WIDTH - 10
+       #print(self.rect.centerx, self.rect.centery)
         return None
 
     #sprawdzenie kolizji
@@ -171,11 +193,12 @@ class Clyde(pygame.sprite.Sprite):
         return ((pinky_tile_x == pacman_tile_x) and (pinky_tile_y == pacman_tile_y))
     
     def scared(self):
-        self.mode = "FRIGHTEND"
+        self.mode = "FRIGHTENED"
         self.speed = const.FRIGHTENED_SPEED
         #zmiana grafiki
     
     def unscared(self, time):
+        if self.mode == "EATEN": return
         self.mode = "CHASE"
         self.mode_update(time)
         self.speed = const.PINKY_SPEED
