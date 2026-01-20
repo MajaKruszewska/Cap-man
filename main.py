@@ -15,10 +15,51 @@ from red import red
 from inky import inky
 
 p.init()
+p.mixer.init()
 
 screen = p.display.set_mode((WIDTH, HEIGHT), p.RESIZABLE)
 game_screen = p.Surface((WIDTH, HEIGHT))
 clock = p.time.Clock()
+
+MUSIC_MAIN = None
+MUSIC_FRIGHTENED = None
+sfx_dot = None
+sfx_power = None
+sfx_eat_ghost = None
+sfx_death = None
+
+# Klasa atrapa (używana gdy nie ma pliku dźwiękowego)
+class DummySound:
+    def play(self): pass
+    def set_volume(self, v): pass
+
+# --- 2. ŁADOWANIE PLIKÓW DŹWIĘKOWYCH ---
+print("--- Próba ładowania dźwięków ---")
+try:
+   
+    MUSIC_MAIN = 'charge.ogg'           
+    MUSIC_FRIGHTENED = 'mystical.mp3' 
+
+    
+    try: sfx_dot = p.mixer.Sound('Picked Coin Echo 2.wav'); sfx_dot.set_volume(0.2)
+    except: sfx_dot = DummySound(); print("Brak pliku: sfx_dot.wav")
+
+    try: sfx_power = p.mixer.Sound('Power Up.wav'); sfx_power.set_volume(0.4)
+    except: sfx_power = DummySound(); print("Brak pliku: sfx_power.wav")
+
+    try: sfx_eat_ghost = p.mixer.Sound('Win sound.wav'); sfx_eat_ghost.set_volume(1.0)
+    except: sfx_eat_ghost = DummySound(); print("Brak pliku: sfx_eat_ghost.wav")
+
+    try: sfx_death = p.mixer.Sound('1.mp3'); sfx_death.set_volume(0.8)
+    except: sfx_death = DummySound(); print("Brak pliku: sfx_death.wav")
+
+    print("--- Dźwięki załadowane (te które znaleziono) ---")
+
+except Exception as e:
+    print(f"KRYTYCZNY BŁĄD DŹWIĘKU: {e}")
+    sfx_dot = sfx_power = sfx_eat_ghost = sfx_death = DummySound()
+    MUSIC_MAIN = MUSIC_FRIGHTENED = None
+
 
 start_time = p.time.get_ticks() #czas dla duszkow
 
@@ -54,6 +95,14 @@ def reset_positions():
     global start_time
     start_time = p.time.get_ticks()
     is_frightened = False
+
+    if MUSIC_MAIN:
+        try:
+            p.mixer.music.load(MUSIC_MAIN)
+            p.mixer.music.play(-1)
+        except Exception as e:
+            print(f"Nie udało się odtworzyć muzyki startowej: {e}")
+
     player.empty()
     pinky.empty()
     clyde.empty()
@@ -77,9 +126,11 @@ def check_point_collision(player_sprite, current_level, current_score):
 
         if tile_content == 'n':      # Mały punkt
             current_level[tile_y][tile_x] = 'a' # Zamień na puste pole ('a')
+            sfx_dot.play(maxtime=1000)
             return current_score + 10, False
         elif tile_content == 'o':    # Duży punkt
             current_level[tile_y][tile_x] = 'a' # Zamień na puste pole ('a')
+            sfx_power.play(maxtime=1000)
             return current_score + 50, True
             
     return current_score, False
@@ -101,6 +152,7 @@ def handle_ghost_collision(ghost_sprite, player_sprite):
             # ale Pinky i Clyde potrzebują pomocy:
             ghost_sprite.mode = "EATEN"
             ghost_sprite.speed = EATEN_SPEED # Stała z CONST.py
+            sfx_eat_ghost.play(maxtime=1000)
             return 200 # Standardowa nagroda za pierwszego duszka
             
         # Przypadek 3: Duszek jest w trybie CHASE lub SCATTER - CapMan ginie
@@ -114,6 +166,13 @@ def activate_frightened_mode():
     is_frightened = True
     frightened_start_time = p.time.get_ticks()
     
+    if MUSIC_FRIGHTENED:
+        try:
+            p.mixer.music.load(MUSIC_FRIGHTENED)
+            p.mixer.music.play(-1)
+        except Exception as e:
+            print(f"Błąd odtwarzania muzyki FRIGHTENED: {e}")
+
     # 1. Pinky (Brak metody, ręczne ustawienie, uwaga na literówkę w pinky.py)
     pinky.sprite.mode = "FRIGHTEND" 
     pinky.sprite.speed = FRIGHTENED_SPEED
@@ -135,6 +194,13 @@ def update_ghosts_modes(current_time_sec):
         # Sprawdzamy czy minęło 6 sekund (6000 ms)
         if p.time.get_ticks() - frightened_start_time > FRIGHTENED_DURATION:
             is_frightened = False
+
+            if MUSIC_MAIN:
+                try:
+                    p.mixer.music.load(MUSIC_MAIN)
+                    p.mixer.music.play(-1)
+                except: pass
+
             # Wymuszamy aktualizację trybu na podstawie czasu gry
             # Pinky
             pinky.sprite.mode_update(current_time_sec)
@@ -227,7 +293,8 @@ while running:
     if death_occured:
         lives -= 1
         print(f"HP DOWN\nREAMANING: {lives}")
-
+        p.mixer.music.stop()
+        sfx_death.play()
         player.draw(game_screen)
         p.display.flip()
 
