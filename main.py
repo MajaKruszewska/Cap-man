@@ -43,7 +43,7 @@ level = copy.deepcopy(board)
 score = 0
 game_font = p.font.Font("Tiny5-Regular.ttf", 45) 
 game_over_font = p.font.Font("Tiny5-Regular.ttf", 200)
-lives = 3
+lives = 1
 
 #Zmienne do trybu przestraszenia/FRIGHTENED
 is_frightened = False
@@ -150,7 +150,7 @@ def show_game_final_score():
     overlay = p.Surface((WIDTH, HEIGHT))
     overlay.set_alpha(180) # Przezroczystość (0-255)
     overlay.fill((0,0,0))
-    screen.blit(overlay, (0,0))
+    game_screen.blit(overlay, (0,0))
     
     text_surf = game_over_font.render("GAME OVER", True, "red")
     score_surf = game_font.render(f"Wynik końcowy: {score}", True, "white")
@@ -159,8 +159,14 @@ def show_game_final_score():
     text_rect = text_surf.get_rect(center=(WIDTH/2, HEIGHT/2 - 100))
     score_rect = score_surf.get_rect(center=(WIDTH/2, HEIGHT/2 + 50))
     
-    screen.blit(text_surf, text_rect)
-    screen.blit(score_surf, score_rect)
+    game_screen.blit(text_surf, text_rect)
+    game_screen.blit(score_surf, score_rect)
+
+    # Skalowanie obrazu 
+    current_w, current_h = screen.get_size()
+    scaled_surface = p.transform.smoothscale(game_screen, (current_w, current_h))
+    screen.blit(scaled_surface, (0, 0))
+
     p.display.flip()
     
     # Zamrożenie gry na 3 sekundy
