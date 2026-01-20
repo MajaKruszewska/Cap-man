@@ -122,3 +122,12 @@ class Pinky(pygame.sprite.Sprite):
         if self.mode == "EATEN" and abs(self.rect.x - self.home_x) < 2 and abs(self.rect.y - self.home_y) < 2: 
             self.mode == "SCATTER"
             self.cooldown = 5 
+
+    def collision(self, pacman):
+        pinky_tile_x = self.rect.centerx // const.TILE_SIZE_X
+        pinky_tile_y = self.rect.centery // const.TILE_SIZE_Y
+
+        pacman_tile_x = pacman.rect.centerx // const.TILE_SIZE_X
+        pacman_tile_y = pacman.rect.centery // const.TILE_SIZE_Y
+
+        return ((pinky_tile_x == pacman_tile_x) and (pinky_tile_y == pacman_tile_y))
