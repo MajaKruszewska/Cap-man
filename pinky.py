@@ -30,7 +30,7 @@ class Pinky(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        self.home_x, self.home_y = 23.5*const.TILE_SIZE_X, 9.5*const.TILE_SIZE_Y #wspolrzedne poczatkowe
+        self.home_x, self.home_y = 23.5*const.TILE_SIZE_X, 9*const.TILE_SIZE_Y #wspolrzedne poczatkowe
         self.direction = const.LEFT #kierunek poczatkowy
         self.mode = "SCATTER" #tryb poczatkowy
         self.speed = const.PINKY_SPEED
@@ -43,15 +43,17 @@ class Pinky(pygame.sprite.Sprite):
 
         #wspolrzedne startowe
         self.rect = self.image.get_rect(center = (self.home_x, self.home_y))
+        self.home_x = self.rect.centerx
+        self.home_y = self.rect.centery
 
     #wyznaczenie pola w kierunku ktorego idzie duszek w zaleznosc od trybu
     def get_target(self, pacman):
         #jezeli SCATTER to idzie do lewego gornego
         if self.mode == "SCATTER": return 2, 2
-        #jezeli FRIGHTEND to losowy ruch
-        if self.mode == "FRIGHTEND": return -1, -1
+        #jezeli FRIGHTENED to losowy ruch
+        if self.mode == "FRIGHTENED": return -1, -1
         #jezeli EATEN to wraca do domu
-        if self.mode == "EATEN": return self.home_x, self.home_y
+        if self.mode == "EATEN": return self.home_x // const.TILE_SIZE_X, self.home_y // const.TILE_SIZE_Y
         #jezeli CHASE to mierzy 4 pola przed pacmana
         dir = None
         if pacman.capman_direction == None: dir = const.LEFT
@@ -61,16 +63,22 @@ class Pinky(pygame.sprite.Sprite):
         elif pacman.capman_direction == "move_down": dir = const.DOWN
         target_x = pacman.rect.centerx + 4*dir[0]
         target_y = pacman.rect.centery + 4*dir[1]
-        while target_x > const.WIDTH or target_y > const.HEIGHT or grid[target_y // const.TILE_SIZE_Y][target_x // const.TILE_SIZE_X] not in "ano":
+        while target_x > const.WIDTH or target_y > const.HEIGHT or grid[target_y // const.TILE_SIZE_Y][target_x // const.TILE_SIZE_X] not in "anop":
             target_x -= dir[0]
             target_y -= dir[1]
         return target_x // const.TILE_SIZE_X, target_y // const.TILE_SIZE_Y
     
     #zamian trybu wzgledem czasu
     def mode_update(self, time):
-        if self.mode == "FRIGHTEND": return
-        if self.mode == "EATEN": return
-        if 0 < time <= 7: self.mode = "SCATTER"
+        if self.mode == "FRIGHTENED": return
+        if self.mode == "EATEN":
+            #print(self.rect.centerx, self.home_x, self.rect.centery, self.home_y)
+            if self.rect.centerx == self.home_x and self.rect.centery == self.home_y and self.cooldown != 0: self.cooldown -= 1
+            if self.rect.centerx == self.home_x and self.rect.centery == self.home_y and self.cooldown == 0:
+                self.speed = const.PINKY_SPEED
+                self.mode = "SCATTER"
+            return
+        elif 0 < time <= 7: self.mode = "SCATTER"
         elif 7 < time <= 27: self.mode = "CHASE"
         elif 27 < time <= 34: self.mode = "SCATTER"
         elif 34 < time <= 54: self.mode = "CHASE" 
@@ -92,7 +100,7 @@ class Pinky(pygame.sprite.Sprite):
         def possible(y, x):
             if 0 <= y <= max_y:
                 x = x%max_x
-                if self.mode == "CHASE": return grid[y][x] in "ano"
+                if self.mode == "CHASE": return grid[y][x] in "anop"
                 else: return grid[y][x] in "anop"
             return False
 
@@ -136,13 +144,13 @@ class Pinky(pygame.sprite.Sprite):
     def update(self, pacman, time):
         #aktualizacja trybu
         self.mode_update(time)
-
+        #print(self.mode)
         #mozliwe ruchy #right left up down
         moves = self.possible_moves()
 
         #gdzie idziemy
         target_x, target_y = self.get_target(pacman)
-        print(target_x, target_y)
+        #print(target_x, target_y)
 
         if target_x == -1 and target_y == -1:
             directions = []
@@ -158,7 +166,7 @@ class Pinky(pygame.sprite.Sprite):
         tile_y = self.rect.centery // const.TILE_SIZE_Y
         direction = None
 
-        allowed = "ano" if self.mode == "CHASE" else "anop" 
+        allowed = "anop" if self.mode == "CHASE" else "anop" 
         goto = bfs(tile_x, tile_y, target_x, target_y, allowed)
         goto_x, goto_y = goto
         #print(goto_x, goto_y, tile_x, tile_y)
@@ -188,11 +196,12 @@ class Pinky(pygame.sprite.Sprite):
         return ((pinky_tile_x == pacman_tile_x) and (pinky_tile_y == pacman_tile_y))
     
     def scared(self):
-        self.mode = "FRIGHTEND"
+        self.mode = "FRIGHTENED"
         self.speed = const.FRIGHTENED_SPEED
         #zmiana grafiki
     
     def unscared(self, time):
+        if self.mode == "EATEN": return
         self.mode = "CHASE"
         self.mode_update(time)
         self.speed = const.PINKY_SPEED

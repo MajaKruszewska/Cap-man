@@ -95,11 +95,12 @@ def handle_ghost_collision(ghost_sprite, player_sprite):
             
         # Przypadek 2: Duszek jest przerażony - ZJADAMY GO
         # Sprawdzamy obie pisownie używane w plikach: "FRIGHTENED" (Red/Inky) i "FRIGHTEND" (Pinky/Clyde)
-        if mode == "FRIGHTENED" or mode == "FRIGHTEND":
+        if mode == "FRIGHTENED":
             # Red i Inky zmieniają się same w swojej metodzie collision, 
             # ale Pinky i Clyde potrzebują pomocy:
             ghost_sprite.mode = "EATEN"
             ghost_sprite.speed = EATEN_SPEED # Stała z CONST.py
+            ghost_sprite.cooldown = BASIC_COOLDOWN
             return 200 # Standardowa nagroda za pierwszego duszka
             
         # Przypadek 3: Duszek jest w trybie CHASE lub SCATTER - CapMan ginie
