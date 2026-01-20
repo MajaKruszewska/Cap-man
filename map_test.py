@@ -11,6 +11,8 @@ from map_generator import draw_map
 from hero import CapMan
 from pinky import Pinky
 from clyde import Clyde
+from red import red
+from inky import inky
 
 p.init()
 
@@ -27,6 +29,12 @@ pinky.add(Pinky())
 
 clyde = p.sprite.GroupSingle()
 clyde.add(Clyde())
+
+ghost_red = p.sprite.GroupSingle()
+ghost_red.add(red())
+
+ghost_inky = p.sprite.GroupSingle()
+ghost_inky.add(inky())
 
 level = copy.deepcopy(board)
 
@@ -57,10 +65,7 @@ running = True
 while running:
 
     current_time_seconds = (p.time.get_ticks() - start_time) / 1000
-    pinky.update(player.sprite, current_time_seconds)
-    clyde.update(player.sprite, current_time_seconds)
-
-
+    
     for event in p.event.get():
         if event.type == p.QUIT:
             running = False
@@ -69,20 +74,34 @@ while running:
             if last_key != None:
                 player.sprite.direction = last_key
                 player.sprite.player_rotation(player.sprite.direction)
-    screen.fill('black')
-    draw_map(screen, level)
-    player.draw(screen)
+
+    pinky.update(player.sprite, current_time_seconds)
+    clyde.update(player.sprite, current_time_seconds)
+    ghost_red.update(player.sprite, current_time_seconds)
+    ghost_inky.update(player.sprite, ghost_red.sprite, current_time_seconds)
+
     player.update(player.sprite.direction)
 
+    screen.fill('black')
+    draw_map(screen, level)
+    
+    player.draw(screen)
     pinky.draw(screen)
     clyde.draw(screen)
+    ghost_red.draw(screen)
+    ghost_inky.draw(screen)
 
     #Sprawdzenie kolizji z punktami i aktualizacja wyniku
     score = check_point_collision(player.sprite, level, score)
     score_text = game_font.render(f"Licznik punktów: {score}", True, "white")
     screen.blit(score_text, (50, HEIGHT - 40))
 
-    if pinky.sprite.collision(player.sprite) or clyde.sprite.collision(player.sprite):
+    if (pinky.sprite.collision(player.sprite)or 
+        clyde.sprite.collision(player.sprite)or
+        ghost_red.sprite.collision(player.sprite)or
+        ghost_inky.sprite.collision(player.sprite)):
+
+        print(f"GAME OVER! TWÓJ WYNIK: {score}")
         running = False
 
     p.display.flip()
