@@ -61,6 +61,9 @@ class Pinky(pygame.sprite.Sprite):
         elif pacman.capman_direction == "move_down": dir = const.DOWN
         target_x = pacman.rect.centerx + 4*dir[0]
         target_y = pacman.rect.centery + 4*dir[1]
+        while target_x > const.WIDTH or target_y > const.HEIGHT or grid[target_y // const.TILE_SIZE_Y][target_x // const.TILE_SIZE_X] not in "ano":
+            target_x -= dir[0]
+            target_y -= dir[1]
         return target_x // const.TILE_SIZE_X, target_y // const.TILE_SIZE_Y
     
     #zamian trybu wzgledem czasu
@@ -139,6 +142,7 @@ class Pinky(pygame.sprite.Sprite):
 
         #gdzie idziemy
         target_x, target_y = self.get_target(pacman)
+        print(target_x, target_y)
 
         if target_x == -1 and target_y == -1:
             directions = []
@@ -156,13 +160,14 @@ class Pinky(pygame.sprite.Sprite):
 
         allowed = "ano" if self.mode == "CHASE" else "anop" 
         goto = bfs(tile_x, tile_y, target_x, target_y, allowed)
-        
         goto_x, goto_y = goto
+        #print(goto_x, goto_y, tile_x, tile_y)
 
         for i in range(4):
-            if not moves[i]: continue
+            #if not moves[i]: continue
             new_x = tile_x if const.DIRECTIONS[i] == 0 else (self.rect.centerx + (const.TILE_SIZE_X)*const.DIRECTIONS[i][0]) // const.TILE_SIZE_X
             new_y = tile_y if const.DIRECTIONS[i] == 0 else (self.rect.centery + (const.TILE_SIZE_Y)*const.DIRECTIONS[i][1]) // const.TILE_SIZE_Y
+            #print(new_x, new_y)
             if new_x == goto_x and new_y == goto_y: 
                 direction = const.DIRECTIONS[i]
         self.move(direction)

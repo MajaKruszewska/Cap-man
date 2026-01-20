@@ -154,7 +154,7 @@ class Clyde(pygame.sprite.Sprite):
         goto_x, goto_y = goto
 
         for i in range(4):
-            if not moves[i]: continue
+            #if not moves[i]: continue
             new_x = tile_x if const.DIRECTIONS[i] == 0 else (self.rect.centerx + (const.TILE_SIZE_X)*const.DIRECTIONS[i][0]) // const.TILE_SIZE_X
             new_y = tile_y if const.DIRECTIONS[i] == 0 else (self.rect.centery + (const.TILE_SIZE_Y)*const.DIRECTIONS[i][1]) // const.TILE_SIZE_Y
             if new_x == goto_x and new_y == goto_y: 
