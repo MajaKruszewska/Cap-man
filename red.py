@@ -41,7 +41,7 @@ class red(p.sprite.Sprite):
         self.next_direction = const.UP
         self.mode = "SCATTER"
         self.speed = const.PINKY_SPEED
-        self.image = p.image.load("cap_man_1.png").convert_alpha()
+        self.image = p.image.load('images/blinky/blinky_down_1.png').convert_alpha()
         self.image = p.transform.scale(self.image, (45, 45))
         
         start_px_x = self.home_tile_x * const.TILE_SIZE_X + const.TILE_SIZE_X // 2
@@ -95,6 +95,7 @@ class red(p.sprite.Sprite):
         if (curr_tile_x, curr_tile_y) != self.last_tile:
             
             if self.mode == "FRIGHTENED":
+                allowed="ano"
                 possible_dirs = []
                 for d in [const.UP, const.DOWN, const.LEFT, const.RIGHT]:
                     if d == (-self.direction[0], -self.direction[1]): 
@@ -141,6 +142,7 @@ class red(p.sprite.Sprite):
         #do wywolania w przypadku kolizji reda z capmanem
         if self.mode == "EATEN": return False
         if self.mode == "FRIGHTENED":
-            self.mode="EATEN"
-            self.speed=const.EATEN_SPEED
+            if self.rect.colliderect(capman.rect):
+                self.mode="EATEN"
+                self.speed=const.EATEN_SPEED
         return self.rect.colliderect(capman.rect)

@@ -17,7 +17,8 @@ from inky import inky
 p.init()
 p.mixer.init()
 
-screen = p.display.set_mode((WIDTH, HEIGHT))
+screen = p.display.set_mode((WIDTH, HEIGHT), p.RESIZABLE)
+game_screen = p.Surface((WIDTH, HEIGHT))
 clock = p.time.Clock()
 
 MUSIC_MAIN = None
@@ -81,9 +82,9 @@ level = copy.deepcopy(board)
 
 # Zmienne do obsługi punktacji
 score = 0
-game_font = p.font.SysFont("arial", 30) 
-game_over_font = p.font.SysFont("arial", 60)
-lives = 3
+game_font = p.font.Font("Tiny5-Regular.ttf", 45) 
+game_over_font = p.font.Font("Tiny5-Regular.ttf", 200)
+lives = 1
 
 #Zmienne do trybu przestraszenia/FRIGHTENED
 is_frightened = False
@@ -215,17 +216,23 @@ def show_game_final_score():
     overlay = p.Surface((WIDTH, HEIGHT))
     overlay.set_alpha(180) # Przezroczystość (0-255)
     overlay.fill((0,0,0))
-    screen.blit(overlay, (0,0))
+    game_screen.blit(overlay, (0,0))
     
     text_surf = game_over_font.render("GAME OVER", True, "red")
     score_surf = game_font.render(f"Wynik końcowy: {score}", True, "white")
     
     # Centrowanie napisów
-    text_rect = text_surf.get_rect(center=(WIDTH/2, HEIGHT/2 - 50))
-    score_rect = score_surf.get_rect(center=(WIDTH/2, HEIGHT/2 + 20))
+    text_rect = text_surf.get_rect(center=(WIDTH/2, HEIGHT/2 - 100))
+    score_rect = score_surf.get_rect(center=(WIDTH/2, HEIGHT/2 + 50))
     
-    screen.blit(text_surf, text_rect)
-    screen.blit(score_surf, score_rect)
+    game_screen.blit(text_surf, text_rect)
+    game_screen.blit(score_surf, score_rect)
+
+    # Skalowanie obrazu 
+    current_w, current_h = screen.get_size()
+    scaled_surface = p.transform.smoothscale(game_screen, (current_w, current_h))
+    screen.blit(scaled_surface, (0, 0))
+
     p.display.flip()
     
     # Zamrożenie gry na 3 sekundy
@@ -241,7 +248,7 @@ while running:
     for event in p.event.get():
         if event.type == p.QUIT:
             running = False
-        if event.type == p.KEYDOWN:
+        elif event.type == p.KEYDOWN:
             if event.key == p.K_ESCAPE:
                 running = False
                 exit()
@@ -250,6 +257,11 @@ while running:
             if last_key != None:
                 player.sprite.direction = last_key
                 player.sprite.player_rotation(player.sprite.direction)
+
+        elif event.type == p.VIDEORESIZE:
+            # Aktualizujemy prawdziwy ekran do nowych wymiarów
+            width, height = event.w, event.h
+            screen = p.display.set_mode((width, height), p.RESIZABLE)
 
     update_ghosts_modes(current_time_seconds)
 
@@ -281,9 +293,8 @@ while running:
     if death_occured:
         lives -= 1
         print(f"HP DOWN\nREAMANING: {lives}")
-        p.mixer.music.stop()
-        sfx_death.play()
-        player.draw(screen)
+
+        player.draw(game_screen)
         p.display.flip()
 
         if lives > 0:
@@ -293,21 +304,26 @@ while running:
             show_game_final_score()
             running = False
 
-    screen.fill('black')
-    draw_map(screen, level)
+    game_screen.fill('black')
+    draw_map(game_screen, level)
     
-    player.draw(screen)
-    pinky.draw(screen)
-    clyde.draw(screen)
-    ghost_red.draw(screen)
-    ghost_inky.draw(screen)
+    player.draw(game_screen)
+    pinky.draw(game_screen)
+    clyde.draw(game_screen)
+    ghost_red.draw(game_screen)
+    ghost_inky.draw(game_screen)
 
     #aktualizacja wyniku
-    score_text = game_font.render(f"Licznik punktów: {score}", True, "white")
-    screen.blit(score_text, (50, HEIGHT - 40))
+    score_text = game_font.render(f"SCORE: {score}", True, "white")
+    game_screen.blit(score_text, (100, HEIGHT - 60))
 
-    lives_text = game_font.render(f"Życia: {lives}", True, "red")
-    screen.blit(lives_text, (WIDTH - 150, HEIGHT - 40))
+    lives_text = game_font.render(f"LIVES: {lives}", True, "red")
+    game_screen.blit(lives_text, (WIDTH - 300, HEIGHT - 60))
+
+     # skalowanie obrazu 
+    current_w, current_h = screen.get_size()
+    scaled_surface = p.transform.smoothscale(game_screen, (current_w, current_h))
+    screen.blit(scaled_surface, (0, 0))
 
 
 
