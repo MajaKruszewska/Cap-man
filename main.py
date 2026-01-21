@@ -13,6 +13,7 @@ from pinky import Pinky
 from clyde import Clyde
 from red import red
 from inky import inky
+from menu import main_menu 
 
 p.init()
 p.mixer.init()
@@ -272,12 +273,15 @@ def show_game_win():
     p.time.delay(5000)
 
 reset_positions()
-running = True
+running = False
 
+choice = main_menu() # Czekamy, aż menu się zakończy i coś zwróci
+if choice == "EXIT":
+    exit()
+else: 
+    running = True  
 while running:
-
     current_time_seconds = (p.time.get_ticks() - start_time) / 1000
-    
     for event in p.event.get():
         if event.type == p.QUIT:
             running = False
@@ -369,7 +373,7 @@ while running:
     lives_text = game_font.render(f"LIVES: {lives}", True, "red")
     game_screen.blit(lives_text, (WIDTH - 300, HEIGHT - 60))
 
-     # skalowanie obrazu 
+    # skalowanie obrazu 
     current_w, current_h = screen.get_size()
     scaled_surface = p.transform.smoothscale(game_screen, (current_w, current_h))
     screen.blit(scaled_surface, (0, 0))

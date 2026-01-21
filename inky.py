@@ -47,15 +47,46 @@ class inky(p.sprite.Sprite):
         self.next_direction = const.UP
         self.mode = "SCATTER"
         self.speed = const.PINKY_SPEED
-       
-        self.image = p.image.load('assets/images/inky/inky_down_1.png').convert_alpha()
-        self.image = p.transform.scale(self.image, (45, 45))
+        
+        #images_list[0], images_list[1] - right, images_list[2], images_list[3] - down, 
+        #images_list[4], images_list[5] - left, images_list[6], images_list[7] - up
+        self.images_list = []
+        self.images_list.append(p.image.load('assets/images/inky/inky_right_1.png').convert_alpha())
+        self.images_list.append(p.image.load('assets/images/inky/inky_right_2.png').convert_alpha())
+        self.images_list.append(p.image.load('assets/images/inky/inky_down_1.png').convert_alpha())
+        self.images_list.append(p.image.load('assets/images/inky/inky_down_2.png').convert_alpha())
+        self.images_list.append(p.image.load('assets/images/inky/inky_left_1.png').convert_alpha())
+        self.images_list.append(p.image.load('assets/images/inky/inky_left_2.png').convert_alpha())
+        self.images_list.append(p.image.load('assets/images/inky/inky_up_1.png').convert_alpha())
+        self.images_list.append(p.image.load('assets/images/inky/inky_up_2.png').convert_alpha())
+        
+        for i in range(8):
+            self.images_list[i] = p.transform.scale(self.images_list[i], (45, 45))
+        self.image = self.images_list[3]
         
         start_px_x = self.home_tile_x * const.TILE_SIZE_X + const.TILE_SIZE_X // 2
         start_px_y = self.home_tile_y * const.TILE_SIZE_Y + const.TILE_SIZE_Y // 2
         self.rect = self.image.get_rect(center=(start_px_x, start_px_y))
         
         self.last_tile = (-1, -1)
+    
+    def animation(self, time):
+        if self.direction == const.RIGHT and int(((time*10) % 6) % 2) == 0:
+            self.image = self.images_list[0]
+        elif self.direction == const.RIGHT and int(((time*10) % 6) % 2) == 1:
+            self.image = self.images_list[1]
+        elif self.direction == const.DOWN and int(((time*10) % 6) % 2) == 0:
+            self.image = self.images_list[2]
+        elif self.direction == const.DOWN and int(((time*10) % 6) % 2) == 1:
+            self.image = self.images_list[3]
+        elif self.direction == const.LEFT and int(((time*10) % 6) % 2) == 0:
+            self.image = self.images_list[4]
+        elif self.direction == const.LEFT and int(((time*10) % 6) % 2) == 1:
+            self.image = self.images_list[5]
+        elif self.direction == const.UP and int(((time*10) % 6) % 2) == 0:
+            self.image = self.images_list[6]
+        elif self.direction == const.UP and int(((time*10) % 6) % 2) == 1:
+            self.image = self.images_list[7]
 
     def mode_update(self, time):
         if self.mode in ["FRIGHTENED", "EATEN"]: return
@@ -184,6 +215,8 @@ class inky(p.sprite.Sprite):
                 if self.direction == const.DOWN: 
                     self.direction = const.UP
                     self.next_direction = const.UP
+
+        self.animation(time)
 
     def collision(self, capman):
         if self.mode == "EATEN": return False
