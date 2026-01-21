@@ -15,19 +15,39 @@ class CapMan(p.sprite.Sprite):
         self.rage = False  # Tryb zjadania duszków
         #Pomocniczy obrazek, do zmiany
 
+        self.image1 = p.image.load('assets/images/cap_man_1_1.png').convert_alpha()
+        self.image1 = p.transform.scale(self.image1,(45,45)) 
+        self.image2 = p.image.load('assets/images/cap_man_1_2.png').convert_alpha()
+        self.image2 = p.transform.scale(self.image2,(45,45)) 
+        self.image_status = True
         self.angle = 0
-        self.image = p.image.load('assets/images/cap_man_1_1.png').convert_alpha()
-        self.image = p.transform.scale(self.image,(45,45)) 
+        self.image = self.image1
 
         #Podstawowa pozycja Cap - Mana na obecnej mapie
 
         self.rect = self.image.get_rect(center = (STARTING_POSITION_X,STARTING_POSITION_Y))
 
+    def animation(self):
+        if self.image_status:
+            self.image = self.image2
+            self.image_status = False
+        else:
+            self.image = self.image1
+            self.image_status = True
+        
+
+        if self.angle == 180:
+            self.image = p.transform.flip(self.image,True, False)
+        elif self.angle == 270:
+            self.image = p.transform.rotate(self.image, 90)
+        elif self.angle == 90:
+            self.image = p.transform.flip(self.image,False, True)
+            self.image = p.transform.rotate(self.image, -90)
 
     def player_movement(self, direction, turns):
         #Porusza się w odpowiednim kierunku pod warunkiem że środek jest na ekranie
         #Oraz nie zostanie wciśnięty inny klawisz
-
+        
         center_x = (self.rect.centerx // TILE_SIZE_X) * TILE_SIZE_X + (TILE_SIZE_X // 2)
         center_y = (self.rect.centery // TILE_SIZE_Y) * TILE_SIZE_Y + (TILE_SIZE_Y // 2)
 
@@ -44,6 +64,9 @@ class CapMan(p.sprite.Sprite):
             self.rect.x -= self.speed
             self.rect.centery = center_y
 
+        if (self.rect.x + self.rect.y) % 5 == 0:
+            self.animation()
+    
 
     def player_rotation(self, direction):
         #Oraz nie zostanie wciśnięty inny klawisz
