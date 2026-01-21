@@ -254,8 +254,8 @@ def show_game_win():
     
     # Napis "GRATULACJE" na złoto/zielono
     text_surf = win_font.render("HELLOW WINNER", True, "gold")
-    subtext_surf = game_font.render("WYGRALES!", True, "white")
-    score_surf = game_font.render(f"Wynik końcowy: {score}", True, "white")
+    subtext_surf = game_font.render("!!!You won baby!!!", True, "white")
+    score_surf = game_font.render(f"Final score: {score}", True, "white")
     
     text_rect = text_surf.get_rect(center=(WIDTH/2, HEIGHT/2 - 100))
     subtext_rect = subtext_surf.get_rect(center=(WIDTH/2, HEIGHT/2))
