@@ -5,7 +5,9 @@ from button import Button
 
 p.init()
 
-screen = p.display.set_mode((WIDTH, HEIGHT))
+screen = p.display.set_mode((WIDTH, HEIGHT), p.RESIZABLE)
+game_screen = p.Surface((WIDTH, HEIGHT))
+
 p.display.set_caption("Main menu")
 main_background = p.image.load("images/background.png")
 main_background = p.transform.scale(main_background, (WIDTH, HEIGHT))
@@ -26,29 +28,36 @@ exit_button = Button(WIDTH/2-(250/2), 510, 250, 70, "EXIT", "images/button.png",
 def main_menu():
     running = True
     while running:
-        screen.fill((0,0,0))
-        screen.blit(main_background, (0,0))
-        screen.blit(blinky, (325,716))
-        screen.blit(clyde, (425,716))
-        screen.blit(inky, (525,716))
-        screen.blit(pinky, (625,716))
-        screen.blit(cap_man, (850,716))
+        game_screen.fill((0,0,0))
+        game_screen.blit(main_background, (0,0))
+        game_screen.blit(blinky, (325,716))
+        game_screen.blit(clyde, (425,716))
+        game_screen.blit(inky, (525,716))
+        game_screen.blit(pinky, (625,716))
+        game_screen.blit(cap_man, (850,716))
 
         for event in p.event.get():
             if event.type == p.QUIT:
                 running = False
                 p.quit()
                 sys.exit()
-            if event.type == p.USEREVENT and event.button == exit_button:
-                running = False
-                p.quit()
-                sys.exit()
+            if event.type == p.USEREVENT:
+                if event.button == play_button:
+                    return "PLAY"
+                if event.button == exit_button:
+                    return "EXIT"
+                
             for btn in [play_button, exit_button]:
                 btn.handle_event(event)
 
         for btn in [play_button, exit_button]:
             btn.check_hover(p.mouse.get_pos())
-            btn.draw(screen)
+            btn.draw(game_screen)
+         # skalowanie obrazu 
+         
+        current_w, current_h = screen.get_size()
+        scaled_surface = p.transform.smoothscale(game_screen, (current_w, current_h))
+        screen.blit(scaled_surface, (0, 0))
+
         p.display.flip()
 
-main_menu()
