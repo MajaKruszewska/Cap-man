@@ -41,14 +41,45 @@ class Pinky(pygame.sprite.Sprite):
         self.cooldown = 0 #cooldown po zjedeniu
 
         #obrazek
-        self.angle = 0
-        self.image = pygame.image.load("assets/images/pinky/pinky_down_1.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (45, 45))
+
+        #images_list[0], images_list[1] - right, images_list[2], images_list[3] - down, 
+        #images_list[4], images_list[5] - left, images_list[6], images_list[7] - up
+        self.images_list = []
+        self.images_list.append(pygame.image.load('assets/images/pinky/pinky_right_1.png').convert_alpha())
+        self.images_list.append(pygame.image.load('assets/images/pinky/pinky_right_2.png').convert_alpha())
+        self.images_list.append(pygame.image.load('assets/images/pinky/pinky_down_1.png').convert_alpha())
+        self.images_list.append(pygame.image.load('assets/images/pinky/pinky_down_2.png').convert_alpha())
+        self.images_list.append(pygame.image.load('assets/images/pinky/pinky_left_1.png').convert_alpha())
+        self.images_list.append(pygame.image.load('assets/images/pinky/pinky_left_2.png').convert_alpha())
+        self.images_list.append(pygame.image.load('assets/images/pinky/pinky_up_1.png').convert_alpha())
+        self.images_list.append(pygame.image.load('assets/images/pinky/pinky_up_2.png').convert_alpha())
+        
+        for i in range(8):
+            self.images_list[i] = pygame.transform.scale(self.images_list[i], (45, 45))
+        self.image = self.images_list[3]
 
         #wspolrzedne startowe
         self.rect = self.image.get_rect(center = (self.home_x, self.home_y))
-        #self.home_x = self.rect.centerx
-        #self.home_y = self.rect.centery
+        self.home_x = self.rect.centerx
+        self.home_y = self.rect.centery
+    
+    def animation(self, time):
+        if self.direction == const.RIGHT and int(((time*10) % 6) % 2) == 0:
+            self.image = self.images_list[0]
+        elif self.direction == const.RIGHT and int(((time*10) % 6) % 2) == 1:
+            self.image = self.images_list[1]
+        elif self.direction == const.DOWN and int(((time*10) % 6) % 2) == 0:
+            self.image = self.images_list[2]
+        elif self.direction == const.DOWN and int(((time*10) % 6) % 2) == 1:
+            self.image = self.images_list[3]
+        elif self.direction == const.LEFT and int(((time*10) % 6) % 2) == 0:
+            self.image = self.images_list[4]
+        elif self.direction == const.LEFT and int(((time*10) % 6) % 2) == 1:
+            self.image = self.images_list[5]
+        elif self.direction == const.UP and int(((time*10) % 6) % 2) == 0:
+            self.image = self.images_list[6]
+        elif self.direction == const.UP and int(((time*10) % 6) % 2) == 1:
+            self.image = self.images_list[7]
 
     #wyznaczenie pola w kierunku ktorego idzie duszek w zaleznosci od trybu
     def get_target(self, pacman):
@@ -191,6 +222,10 @@ class Pinky(pygame.sprite.Sprite):
         #tunel
         if self.rect.centerx > const.WIDTH - 10: self.rect.centerx = 10
         elif self.rect.centerx < 10: self.rect.centerx = const.WIDTH - 10
+        #print(self.rect.centerx, self.rect.centery)
+
+        self.animation(time)
+        
         return None
     
     #sprawdzenie kolizji
