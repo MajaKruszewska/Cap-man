@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # --- Python ---
 __pycache__/
 *.pyc
@@ -14,3 +15,6 @@ Thumbs.db
 # --- Edytory kodu ---
 .vscode/
 .idea/
+=======
+/__pycache__
+>>>>>>> menu
